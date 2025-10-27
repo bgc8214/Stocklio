@@ -1,0 +1,252 @@
+[
+  {
+    "ticker": "005930.KS",
+    "name": "삼성전자",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "000660.KS",
+    "name": "SK하이닉스",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "035720.KS",
+    "name": "카카오",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "035420.KS",
+    "name": "NAVER",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "005935.KS",
+    "name": "삼성전자우",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "005380.KS",
+    "name": "현대차",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "051910.KS",
+    "name": "LG화학",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "006400.KS",
+    "name": "삼성SDI",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "000270.KS",
+    "name": "기아",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "068270.KS",
+    "name": "셀트리온",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "207940.KS",
+    "name": "삼성바이오로직스",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "373220.KS",
+    "name": "LG에너지솔루션",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "005490.KS",
+    "name": "POSCO홀딩스",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "105560.KS",
+    "name": "KB금융",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "055550.KS",
+    "name": "신한지주",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "086790.KS",
+    "name": "하나금융지주",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "003550.KS",
+    "name": "LG",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "066570.KS",
+    "name": "LG전자",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "034730.KS",
+    "name": "SK",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "017670.KS",
+    "name": "SK텔레콤",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "030200.KS",
+    "name": "KT",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "012330.KS",
+    "name": "현대모비스",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "036570.KS",
+    "name": "엔씨소프트",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "259960.KS",
+    "name": "크래프톤",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "096770.KS",
+    "name": "SK이노베이션",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "018260.KS",
+    "name": "삼성에스디에스",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "028260.KS",
+    "name": "삼성물산",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "009150.KS",
+    "name": "삼성전기",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "000810.KS",
+    "name": "삼성화재",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "032830.KS",
+    "name": "삼성생명",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "003490.KS",
+    "name": "대한항공",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "011200.KS",
+    "name": "HMM",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "010130.KS",
+    "name": "고려아연",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "009830.KS",
+    "name": "한화솔루션",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "000100.KS",
+    "name": "유한양행",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "323410.KS",
+    "name": "카카오뱅크",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "377300.KS",
+    "name": "카카오페이",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "251270.KS",
+    "name": "넷마블",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "247540.KS",
+    "name": "에코프로비엠",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "086520.KS",
+    "name": "에코프로",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "352820.KS",
+    "name": "하이브",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "263750.KS",
+    "name": "펄어비스",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "003670.KS",
+    "name": "포스코퓨처엠",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "042700.KS",
+    "name": "한미반도체",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "058470.KS",
+    "name": "리노공업",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "091990.KS",
+    "name": "셀트리온헬스케어",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "326030.KS",
+    "name": "SK바이오팜",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "003670.KS",
+    "name": "포스코DX",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "267250.KS",
+    "name": "HD현대",
+    "market": "KOSPI"
+  },
+  {
+    "ticker": "010140.KS",
+    "name": "삼성중공업",
+    "market": "KOSPI"
+  }
+]
