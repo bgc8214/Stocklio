@@ -52,9 +52,11 @@ Future<void> _performDailyUpdate() async {
 
     for (var portfolio in portfolios) {
       try {
-        final currentPrice = await yahooFinance.getCurrentPrice(portfolio.ticker);
+        final priceData = await yahooFinance.getCurrentPrice(portfolio.ticker);
 
-        if (currentPrice != null) {
+        if (priceData != null) {
+          final currentPrice = priceData['currentPrice'] as double;
+
           // 데이터베이스에 현재가 업데이트
           await db.updatePortfolioCurrentPrice(portfolio.id!, currentPrice);
 
