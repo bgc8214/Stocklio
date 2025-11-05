@@ -163,7 +163,9 @@ class DatabaseService {
         display_name TEXT NOT NULL,
         icon TEXT NOT NULL,
         color TEXT NOT NULL,
-        description TEXT NOT NULL
+        description TEXT NOT NULL,
+        target_amount REAL,
+        target_weight REAL
       )
     ''');
 
