@@ -1,14 +1,31 @@
 import 'package:yahoo_finance_data_reader/yahoo_finance_data_reader.dart';
 
 class YahooFinanceService {
-  /// 현재가 조회
-  Future<double?> getCurrentPrice(String ticker) async {
+  /// 현재가 조회 (가격 변동 정보 포함)
+  Future<Map<String, dynamic>?> getCurrentPrice(String ticker) async {
     try {
       final reader = YahooFinanceDailyReader();
       final response = await reader.getDailyDTOs(ticker);
 
       if (response.candlesData.isNotEmpty) {
-        return response.candlesData.last.close;
+        final latest = response.candlesData.last;
+
+        // 전일 종가 (가격 변동 계산용)
+        double? previousClose;
+        double? priceChange;
+        double? priceChangePercent;
+
+        if (response.candlesData.length > 1) {
+          previousClose = response.candlesData[response.candlesData.length - 2].close;
+          priceChange = latest.close - previousClose;
+          priceChangePercent = (priceChange / previousClose) * 100;
+        }
+
+        return {
+          'currentPrice': latest.close,
+          'priceChange': priceChange,
+          'priceChangePercent': priceChangePercent,
+        };
       }
       return null;
     } catch (e) {
@@ -18,14 +35,20 @@ class YahooFinanceService {
     }
   }
 
+  /// 현재가만 조회 (단순 double 반환)
+  Future<double?> getCurrentPriceSimple(String ticker) async {
+    final priceData = await getCurrentPrice(ticker);
+    return priceData?['currentPrice'] as double?;
+  }
+
   /// 여러 종목의 현재가 일괄 조회
   Future<Map<String, double>> getBatchPrices(List<String> tickers) async {
     final prices = <String, double>{};
 
     for (var ticker in tickers) {
-      final price = await getCurrentPrice(ticker);
-      if (price != null) {
-        prices[ticker] = price;
+      final priceData = await getCurrentPrice(ticker);
+      if (priceData != null) {
+        prices[ticker] = priceData['currentPrice'] as double;
       }
 
       // API 부담 줄이기 위한 딜레이
