@@ -463,10 +463,10 @@ class DatabaseService {
     return results.map((row) {
       return {
         'date': DateTime.parse(row['snapshot_date'] as String),
-        'totalValue': row['total_value'] as double,
-        'totalCost': row['total_investment'] as double,
-        'totalProfit': row['total_profit'] as double,
-        'dailyProfit': row['daily_profit'] as double? ?? 0.0,
+        'totalValue': (row['total_value'] as num?)?.toDouble() ?? 0.0,
+        'totalCost': (row['total_investment'] as num?)?.toDouble() ?? 0.0,
+        'totalProfit': (row['total_profit'] as num?)?.toDouble() ?? 0.0,
+        'dailyProfit': (row['daily_profit'] as num?)?.toDouble() ?? 0.0,
       };
     }).toList();
   }
@@ -502,9 +502,9 @@ class DatabaseService {
     final row = results.first;
     return {
       'date': DateTime.parse(row['snapshot_date'] as String),
-      'totalValue': row['total_value'] as double,
-      'totalCost': row['total_cost'] as double,
-      'dailyProfit': row['daily_profit'] as double,
+      'totalValue': (row['total_value'] as num?)?.toDouble() ?? 0.0,
+      'totalCost': (row['total_investment'] as num?)?.toDouble() ?? 0.0,
+      'dailyProfit': (row['daily_profit'] as num?)?.toDouble() ?? 0.0,
     };
   }
 
