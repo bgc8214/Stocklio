@@ -3,11 +3,13 @@ import '../models/portfolio.dart';
 import '../services/database_service.dart';
 import '../services/yahoo_finance_service.dart';
 import '../services/snapshot_recovery_service.dart';
+import '../services/price_cache_service.dart';
 
 class PortfolioProvider with ChangeNotifier {
   final DatabaseService _db = DatabaseService();
   final YahooFinanceService _yahooFinance = YahooFinanceService();
   final SnapshotRecoveryService _recoveryService = SnapshotRecoveryService();
+  final PriceCacheService _priceCache = PriceCacheService();
 
   List<Portfolio> _portfolioList = [];
   bool _isLoading = false;
@@ -97,32 +99,56 @@ class PortfolioProvider with ChangeNotifier {
     }
   }
 
-  // 현재가 업데이트 (병렬 처리로 성능 개선)
+  // 현재가 업데이트 (캐시 우선, 병렬 처리로 성능 개선)
   Future<void> _updateCurrentPrices() async {
     try {
-      // 모든 종목의 가격을 병렬로 조회
+      // 모든 종목의 가격을 병렬로 조회 (캐시 우선)
       final priceUpdates = await Future.wait(
         _portfolioList.map((portfolio) async {
           try {
-            final currentPrice = await _yahooFinance.getCurrentPrice(portfolio.ticker);
-            return {'portfolio': portfolio, 'price': currentPrice};
+            // 1. 캐시 확인 (즉시 반환)
+            final cached = _priceCache.getCachedPrice(portfolio.ticker);
+            if (cached != null && cached.isValid) {
+              return {
+                'portfolio': portfolio,
+                'price': cached.currentPrice,
+                'fromCache': true,
+              };
+            }
+
+            // 2. 캐시 없음 -> API 호출
+            final priceData = await _yahooFinance.getCurrentPrice(portfolio.ticker);
+            final price = priceData != null ? priceData['currentPrice'] as double? : null;
+            return {
+              'portfolio': portfolio,
+              'price': price,
+              'fromCache': false,
+            };
           } catch (e) {
             debugPrint('${portfolio.ticker} 현재가 조회 실패: $e');
-            return {'portfolio': portfolio, 'price': null};
+            return {'portfolio': portfolio, 'price': null, 'fromCache': false};
           }
         }),
       );
 
       // 조회된 가격을 업데이트
+      int cachedCount = 0;
       for (var update in priceUpdates) {
         final portfolio = update['portfolio'] as Portfolio;
         final price = update['price'] as double?;
+        final fromCache = update['fromCache'] as bool? ?? false;
 
         if (price != null) {
           portfolio.currentPrice = price;
           // 데이터베이스에 현재가 업데이트
           await _db.updatePortfolioCurrentPrice(portfolio.id!, price);
+
+          if (fromCache) cachedCount++;
         }
+      }
+
+      if (cachedCount > 0) {
+        debugPrint('💰 가격 캐시 사용: $cachedCount/${_portfolioList.length} 종목');
       }
     } catch (e) {
       debugPrint('현재가 일괄 업데이트 실패: $e');

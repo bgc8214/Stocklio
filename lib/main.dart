@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/database_service.dart';
 import 'services/background_service.dart';
+import 'services/price_cache_service.dart';
 import 'models/stock_info.dart';
 import 'providers/portfolio_provider.dart';
 import 'providers/category_provider.dart';
@@ -19,6 +20,9 @@ void main() async {
 
   // 백그라운드 서비스 초기화
   await initializeBackgroundService();
+
+  // 가격 캐시 초기화 (백그라운드에서)
+  initializePriceCache();
 
   runApp(const MyApp());
 }
@@ -38,6 +42,17 @@ Future<void> initializeBackgroundService() async {
   } catch (e) {
     debugPrint('❌ 백그라운드 서비스 초기화 실패: $e');
   }
+}
+
+/// 가격 캐시 초기화 (비동기 백그라운드)
+void initializePriceCache() {
+  Future.microtask(() async {
+    try {
+      await PriceCacheService().initialize();
+    } catch (e) {
+      debugPrint('❌ 가격 캐시 초기화 실패: $e');
+    }
+  });
 }
 
 /// 종목 마스터 데이터 초기화
