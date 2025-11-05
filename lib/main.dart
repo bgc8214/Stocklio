@@ -4,9 +4,12 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/database_service.dart';
+import 'services/background_service.dart';
 import 'models/stock_info.dart';
 import 'providers/portfolio_provider.dart';
+import 'providers/category_provider.dart';
 import 'screens/dashboard_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +17,27 @@ void main() async {
   // 종목 마스터 데이터 초기화
   await initializeStockMaster();
 
+  // 백그라운드 서비스 초기화
+  await initializeBackgroundService();
+
   runApp(const MyApp());
+}
+
+/// 백그라운드 서비스 초기화
+Future<void> initializeBackgroundService() async {
+  try {
+    debugPrint('🚀 백그라운드 서비스 시작...');
+
+    // WorkManager 초기화
+    await BackgroundService.initialize();
+
+    // 일일 자동 업데이트 작업 등록
+    await BackgroundService.registerDailyUpdate();
+
+    debugPrint('✅ 백그라운드 서비스 초기화 완료');
+  } catch (e) {
+    debugPrint('❌ 백그라운드 서비스 초기화 실패: $e');
+  }
 }
 
 /// 종목 마스터 데이터 초기화
@@ -37,7 +60,7 @@ Future<void> initializeStockMaster() async {
   }
 
   if (shouldUpdate) {
-    print('📦 종목 마스터 데이터 업데이트 중...');
+    debugPrint('📦 종목 마스터 데이터 업데이트 중...');
 
     try {
       // assets/krx_stocks.json 파일 로드
@@ -49,12 +72,12 @@ Future<void> initializeStockMaster() async {
       await db.insertStockMaster(stocks);
       await prefs.setString('stock_master_last_update', now.toIso8601String());
 
-      print('✅ 종목 마스터 데이터 업데이트 완료! (총 ${stocks.length}개 종목)');
+      debugPrint('✅ 종목 마스터 데이터 업데이트 완료! (총 ${stocks.length}개 종목)');
     } catch (e) {
-      print('❌ 종목 마스터 데이터 로드 실패: $e');
+      debugPrint('❌ 종목 마스터 데이터 로드 실패: $e');
     }
   } else {
-    print('✅ 종목 마스터 데이터가 최신 상태입니다.');
+    debugPrint('✅ 종목 마스터 데이터가 최신 상태입니다.');
   }
 }
 
@@ -66,23 +89,13 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PortfolioProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
       ],
       child: MaterialApp(
-        title: 'Stocklio',
+        title: 'MyFolio',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-          cardTheme: CardTheme(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
+        theme: AppTheme.lightTheme,
+        // darkTheme: AppTheme.darkTheme, // Phase 2
         home: const DashboardScreen(),
       ),
     );

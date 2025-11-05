@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/portfolio_provider.dart';
 import '../models/portfolio.dart';
 import '../utils/currency_formatter.dart';
-import 'stock_search_screen.dart';
+import 'add_stock_screen.dart';
 import 'add_portfolio_screen.dart';
 
 class PortfolioListScreen extends StatefulWidget {
@@ -58,7 +58,7 @@ class _PortfolioListScreenState extends State<PortfolioListScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const StockSearchScreen(),
+              builder: (context) => const AddStockScreen(),
             ),
           );
         },

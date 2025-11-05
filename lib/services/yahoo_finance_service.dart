@@ -101,4 +101,49 @@ class YahooFinanceService {
       return false;
     }
   }
+
+  /// 특정 날짜의 과거 종가 조회
+  Future<double?> getHistoricalPrice(String ticker, DateTime date) async {
+    try {
+      final reader = YahooFinanceDailyReader();
+      final response = await reader.getDailyDTOs(ticker);
+
+      if (response.candlesData.isEmpty) {
+        return null;
+      }
+
+      // 해당 날짜의 데이터 찾기
+      for (var candle in response.candlesData.reversed) {
+        final candleDate = candle.date;
+
+        // 날짜 비교 (시간 제외)
+        if (candleDate.year == date.year &&
+            candleDate.month == date.month &&
+            candleDate.day == date.day) {
+          return candle.close;
+        }
+
+        // 요청한 날짜보다 이전 데이터면 중단
+        if (candleDate.isBefore(date)) {
+          break;
+        }
+      }
+
+      // 정확한 날짜가 없으면 가장 가까운 이전 날짜의 종가 반환
+      for (var candle in response.candlesData.reversed) {
+        if (candle.date.isBefore(date) ||
+            (candle.date.year == date.year &&
+             candle.date.month == date.month &&
+             candle.date.day == date.day)) {
+          return candle.close;
+        }
+      }
+
+      return null;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error getting historical price for $ticker on $date: $e');
+      return null;
+    }
+  }
 }

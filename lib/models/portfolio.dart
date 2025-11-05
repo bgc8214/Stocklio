@@ -6,6 +6,7 @@ class Portfolio {
   final double averageCost;
   final String market;
   double currentPrice; // 현재가 (변동 가능)
+  final int? categoryId; // 카테고리 ID (1: 나스닥, 2: S&P500, 3: 배당)
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -17,6 +18,7 @@ class Portfolio {
     required this.averageCost,
     required this.market,
     double? currentPrice,
+    this.categoryId,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : currentPrice = currentPrice ?? averageCost,
@@ -40,6 +42,7 @@ class Portfolio {
       currentPrice: map['current_price'] != null
           ? (map['current_price'] as num).toDouble()
           : (map['average_cost'] as num).toDouble(),
+      categoryId: map['category_id'] as int?,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
     );
@@ -54,6 +57,7 @@ class Portfolio {
       'average_cost': averageCost,
       'current_price': currentPrice,
       'market': market,
+      if (categoryId != null) 'category_id': categoryId,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -67,6 +71,7 @@ class Portfolio {
     double? averageCost,
     double? currentPrice,
     String? market,
+    int? categoryId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -78,6 +83,7 @@ class Portfolio {
       averageCost: averageCost ?? this.averageCost,
       currentPrice: currentPrice ?? this.currentPrice,
       market: market ?? this.market,
+      categoryId: categoryId ?? this.categoryId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

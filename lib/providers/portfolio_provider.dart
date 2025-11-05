@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart';
 import '../models/portfolio.dart';
 import '../services/database_service.dart';
 import '../services/yahoo_finance_service.dart';
+import '../services/snapshot_recovery_service.dart';
 
 class PortfolioProvider with ChangeNotifier {
   final DatabaseService _db = DatabaseService();
   final YahooFinanceService _yahooFinance = YahooFinanceService();
+  final SnapshotRecoveryService _recoveryService = SnapshotRecoveryService();
 
   List<Portfolio> _portfolioList = [];
   bool _isLoading = false;
@@ -42,11 +44,20 @@ class PortfolioProvider with ChangeNotifier {
       // 데이터베이스에서 포트폴리오 로드
       _portfolioList = await _db.getPortfolio();
 
-      // 각 종목의 현재가 업데이트
-      await _updateCurrentPrices();
+      // 포트폴리오가 있을 때만 가격 업데이트 및 스냅샷 저장
+      if (_portfolioList.isNotEmpty) {
+        // 누락된 스냅샷 복구 (백그라운드 실패 대응)
+        await _recoverMissingSnapshots();
 
-      // 당일 수익 계산
-      await _calculateTodayProfit();
+        // 각 종목의 현재가 업데이트
+        await _updateCurrentPrices();
+
+        // 당일 수익 계산
+        await _calculateTodayProfit();
+
+        // 당일 스냅샷 자동 저장 (하루에 한 번만)
+        await _saveTodaySnapshotIfNeeded();
+      }
     } catch (e) {
       debugPrint('포트폴리오 로드 실패: $e');
     } finally {
@@ -55,19 +66,66 @@ class PortfolioProvider with ChangeNotifier {
     }
   }
 
-  // 현재가 업데이트
-  Future<void> _updateCurrentPrices() async {
-    for (var portfolio in _portfolioList) {
-      try {
-        final currentPrice = await _yahooFinance.getCurrentPrice(portfolio.ticker);
-        if (currentPrice != null) {
-          portfolio.currentPrice = currentPrice;
-          // 데이터베이스에 현재가 업데이트
-          await _db.updatePortfolioCurrentPrice(portfolio.id!, currentPrice);
-        }
-      } catch (e) {
-        debugPrint('${portfolio.ticker} 현재가 업데이트 실패: $e');
+  // 누락된 스냅샷 복구
+  Future<void> _recoverMissingSnapshots() async {
+    try {
+      final recovered = await _recoveryService.recoverMissingSnapshots();
+      if (recovered > 0) {
+        debugPrint('📝 누락 스냅샷 $recovered개 복구 완료');
       }
+    } catch (e) {
+      debugPrint('⚠️  스냅샷 복구 실패 (무시하고 계속): $e');
+    }
+  }
+
+  // 당일 스냅샷이 없으면 저장
+  Future<void> _saveTodaySnapshotIfNeeded() async {
+    try {
+      final today = DateTime.now();
+      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
+      // 오늘 스냅샷이 이미 있는지 확인
+      final existingSnapshot = await _db.getSnapshotByDate(todayStr);
+
+      if (existingSnapshot == null) {
+        // 없으면 새로 저장
+        await saveDailySnapshot();
+        debugPrint('✅ 당일 스냅샷 저장 완료: $todayStr');
+      }
+    } catch (e) {
+      debugPrint('당일 스냅샷 확인/저장 실패: $e');
+    }
+  }
+
+  // 현재가 업데이트 (병렬 처리로 성능 개선)
+  Future<void> _updateCurrentPrices() async {
+    try {
+      // 모든 종목의 가격을 병렬로 조회
+      final priceUpdates = await Future.wait(
+        _portfolioList.map((portfolio) async {
+          try {
+            final currentPrice = await _yahooFinance.getCurrentPrice(portfolio.ticker);
+            return {'portfolio': portfolio, 'price': currentPrice};
+          } catch (e) {
+            debugPrint('${portfolio.ticker} 현재가 조회 실패: $e');
+            return {'portfolio': portfolio, 'price': null};
+          }
+        }),
+      );
+
+      // 조회된 가격을 업데이트
+      for (var update in priceUpdates) {
+        final portfolio = update['portfolio'] as Portfolio;
+        final price = update['price'] as double?;
+
+        if (price != null) {
+          portfolio.currentPrice = price;
+          // 데이터베이스에 현재가 업데이트
+          await _db.updatePortfolioCurrentPrice(portfolio.id!, price);
+        }
+      }
+    } catch (e) {
+      debugPrint('현재가 일괄 업데이트 실패: $e');
     }
   }
 
@@ -93,12 +151,13 @@ class PortfolioProvider with ChangeNotifier {
     }
   }
 
-  // 종목 추가
+  // 종목 추가 (최적화: 전체 reload 대신 추가만)
   Future<void> addPortfolio({
     required String ticker,
     required String stockName,
     required int quantity,
     required double averagePrice,
+    int? categoryId,
   }) async {
     try {
       // 현재가 조회
@@ -119,10 +178,19 @@ class PortfolioProvider with ChangeNotifier {
         averageCost: averagePrice,
         currentPrice: currentPrice,
         market: ticker.contains('.KS') || ticker.contains('.KQ') ? 'KRX' : 'US',
+        categoryId: categoryId,
       );
 
-      await _db.insertPortfolio(portfolio);
-      await loadPortfolio();
+      final insertedId = await _db.insertPortfolio(portfolio);
+
+      // 전체 reload 대신 새 항목만 추가
+      final portfolioWithId = portfolio.copyWith(id: insertedId);
+      _portfolioList.add(portfolioWithId);
+
+      // 당일 수익 재계산
+      await _calculateTodayProfit();
+
+      notifyListeners();
     } catch (e) {
       debugPrint('종목 추가 실패: $e');
       rethrow;

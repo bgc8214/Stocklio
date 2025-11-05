@@ -125,38 +125,106 @@ PRD에서는 특정 기술을 지정하지 않았습니다. 스택 선택 시 �
 **총 개발 기간:** 약 3개월
 **총 비용:** MVP $25, 정식 출시 $0-10/월
 
-## 개발 명령어
+## 개발 워크플로우 (필수 준수) ⚠️
 
-*프로젝트 생성 후 추가 예정*
+### 기능 개발 시 필수 절차
+
+모든 기능 개발은 다음 순서를 **반드시** 따라야 합니다:
+
+```bash
+# 1단계: 기능 구현
+# - 코드 작성
+
+# 2단계: 정적 분석 (필수)
+flutter analyze
+
+# 3단계: 테스트 코드 작성 (필수)
+# - test/ 디렉토리에 단위 테스트 작성
+# - 비즈니스 로직, 계산 함수, DB 쿼리 등 테스트
+
+# 4단계: 테스트 실행 (필수)
+flutter test
+
+# 5단계: 분석 + 테스트 통합 실행
+flutter analyze && flutter test
+```
+
+### 규칙
+
+✅ **반드시 해야 하는 것:**
+- 기능 구현 후 `flutter analyze` 실행
+- 항상 테스트 코드 작성
+- 모든 테스트가 통과해야 완료
+
+❌ **하지 않아야 하는 것:**
+- `flutter run`으로 UI 테스트 (사용자가 직접 수행)
+- 테스트 없이 PR/커밋
+- analyze 경고 무시
+
+### 테스트 작성 가이드
+
+**테스트해야 할 대상:**
+- ✅ 비즈니스 로직 (계산, 변환, 검증)
+- ✅ 데이터베이스 쿼리
+- ✅ 모델 직렬화/역직렬화
+- ✅ 유틸리티 함수
+
+**테스트 파일 위치:**
+```
+lib/services/database_service.dart
+→ test/services/database_service_test.dart
+
+lib/models/dividend.dart
+→ test/models/dividend_test.dart
+
+lib/utils/currency_formatter.dart
+→ test/utils/currency_formatter_test.dart
+```
+
+### 예시
+
+```dart
+// test/services/database_service_test.dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:stocklio/services/database_service.dart';
+
+void main() {
+  group('배당 계산 테스트', () {
+    test('연간 배당 총액이 올바르게 계산됨', () async {
+      final db = DatabaseService();
+      // Given, When, Then
+    });
+  });
+}
+```
+
+## 개발 명령어
 
 **Flutter:**
 ```bash
-# 개발 서버 실행
-flutter run
+# 코드 품질 검사 (필수)
+flutter analyze
+
+# 단위 테스트 실행 (필수)
+flutter test
+
+# 특정 테스트만 실행
+flutter test test/services/database_service_test.dart
+
+# 커버리지 리포트
+flutter test --coverage
 
 # 빌드 (Android)
 flutter build apk --release
 
 # 빌드 (iOS)
 flutter build ios --release
-
-# 테스트
-flutter test
 ```
 
-**백엔드 (Node.js 예시):**
+**UI 테스트:**
 ```bash
-# 개발 서버
-npm run dev
-
-# 프로덕션 빌드
-npm run build
-
-# 테스트
-npm test
-
-# 스케줄러 실행
-npm run scheduler
+# ❌ Claude는 실행하지 않음 (사용자가 직접 테스트)
+# flutter run
 ```
 
 ## 중요 컨텍스트
